@@ -14,10 +14,11 @@ services:
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.9.2
     command: >
+      sh -c "pip install --no-cache-dir psycopg2-binary &&
       mlflow server
       --backend-store-uri postgresql://mluser:mlpass@postgres:5432/mldb
       --default-artifact-root /mlruns
-      --host 0.0.0.0
+      --host 0.0.0.0"
     volumes:
       - ./mlruns:/mlruns
     ports:
