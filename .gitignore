@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# MLflow artifacts
+mlruns/
+
+# Docker volumes / data
+*.log
+hadoop/
+data/
+
+# OS
+.DS_Store
+Thumbs.db

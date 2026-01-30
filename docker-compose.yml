@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: mluser
+      POSTGRES_PASSWORD: mlpass
+      POSTGRES_DB: mldb
+    ports:
+      - "5432:5432"
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.9.2
+    command: >
+      mlflow server
+      --backend-store-uri postgresql://mluser:mlpass@postgres:5432/mldb
+      --default-artifact-root /mlruns
+      --host 0.0.0.0
+    volumes:
+      - ./mlruns:/mlruns
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    environment:
+      - CLUSTER_NAME=ml-cluster
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    volumes:
+      - namenode:/hadoop/dfs/name
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    environment:
+      - CLUSTER_NAME=ml-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    volumes:
+      - datanode:/hadoop/dfs/data
+    depends_on:
+      - namenode
+
+  spark-master:
+    image: apache/spark:3.5.0
+    container_name: spark-master
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+
+  spark-worker:
+    image: apache/spark:3.5.0
+    container_name: spark-worker
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
+
+  jupyter:
+    image: jupyter/pyspark-notebook
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/work
+
+volumes:
+  namenode:
+  datanode: 
