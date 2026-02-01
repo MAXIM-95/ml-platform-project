@@ -1,0 +1,24 @@
+поднимаем сервисы в докере (запускаем всегда после перезагрузки компа): docker compose up -d
+проверяем состояние всех сервисов (если у всех UP, то можно работать): docker compose ps
+
+ШАГ 2: spark читает raw из hdfs (файл json с сырыми данными пока создан вручную для проверки)
+
+Запуск spark shell: docker exec -it spark-master /opt/spark/bin/spark-shell
+
+Чтение raw json в hdfs:
+val rawPath = "hdfs://namenode:9000/raw/vacancies/*.json"
+val df = spark.read.option("multiLine", true).json(rawPath)
+df.printSchema()
+df.show(false)
+
+
+В юпитер заходить так, из консоли виндовс юпитер не тот, нужен из докера
+ http://127.0.0.1:8888/lab?token=76ee6a481844d96d5cd8a654bf09359ae8263d214fc47f03
+
+
+Поднимаем в докере datanode hdfs: docker compose up -d datanode
+Проверка работоспособности datanode: docker exec -it ml_platform-namenode-1 /opt/hadoop-3.2.1/bin/hdfs dfsadmin -report
+Если видим Live datanodes (1) с HDFS все впорядке
+
+
+Токен юпитера: 03e79724d1dea472d0639704783a42da8bedbf4c8022b8fb

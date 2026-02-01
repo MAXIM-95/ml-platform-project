@@ -30,6 +30,7 @@ services:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     environment:
       - CLUSTER_NAME=ml-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     ports:
       - "9870:9870"
       - "9000:9000"
@@ -40,7 +41,7 @@ services:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     environment:
       - CLUSTER_NAME=ml-cluster
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     volumes:
       - datanode:/hadoop/dfs/data
     depends_on:
