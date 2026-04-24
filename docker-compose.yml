@@ -111,7 +111,7 @@ services:
     command: webserver
 
 #это сервис airflow-scheduler
-airflow-scheduler:
+  airflow-scheduler:
     build: ./airflow
     depends_on:
       - airflow-init
