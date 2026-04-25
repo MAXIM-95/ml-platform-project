@@ -82,6 +82,7 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - _AIRFLOW_WWW_USER_USERNAME=admin
       - _AIRFLOW_WWW_USER_PASSWORD=admin
+      - AIRFLOW__WEBSERVER__SECRET_KEY=ml-platform-secret-key
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./jobs:/opt/airflow/jobs
@@ -106,6 +107,7 @@ services:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://mluser:mlpass@postgres:5432/airflow
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__WEBSERVER__SECRET_KEY=ml-platform-secret-key
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./jobs:/opt/airflow/jobs
@@ -121,6 +123,7 @@ services:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://mluser:mlpass@postgres:5432/airflow
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__WEBSERVER__SECRET_KEY=ml-platform-secret-key
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./jobs:/opt/airflow/jobs
