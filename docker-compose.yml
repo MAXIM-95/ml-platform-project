@@ -55,6 +55,8 @@ services:
     ports:
       - "8080:8080"
       - "7077:7077"
+    volumes:
+      - ./jobs:/opt/jobs
 
   spark-worker:
     image: apache/spark:3.5.0

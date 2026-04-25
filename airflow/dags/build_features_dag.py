@@ -20,7 +20,7 @@ with DAG( #контекстный менеджер
             "docker exec spark-master " #выполняем команду внутри контейнера spark-master
             "/opt/spark/bin/spark-submit " #запускаем Spark job в нормальном режиме “spark-submit”
             "--master spark://spark-master:7077 " #говорим spark-submit: “используй Spark Standalone master”
-            "/opt/airflow/jobs/spark_build_features.py" #путь к нашему скрипту в контейнере airflow (мы его монтируем volume’ом)
+            "/opt/jobs/spark_build_features.py" #путь к нашему скрипту в контейнере airflow (мы его монтируем volume’ом)
         ),
     )
    #Эта строка не обязательна — она просто оставляет задачу в DAG.
