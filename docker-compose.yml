@@ -132,6 +132,40 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: scheduler
 
+#это сервис SuperSet
+  superset-init:
+    image: apache/superset:4.1.2
+    depends_on:
+      - postgres
+    environment:
+      - SUPERSET_SECRET_KEY=ml-platform-superset-secret-key
+      - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://mluser:mlpass@postgres:5432/superset
+    command: >
+      bash -c "
+      superset db upgrade &&
+      superset fab create-admin
+        --username admin
+        --firstname Admin
+        --lastname User
+        --email admin@example.com
+        --password admin || true &&
+      superset init
+      "
+
+  superset:
+    image: apache/superset:4.1.2
+    container_name: superset
+    depends_on:
+      - postgres
+      - superset-init
+    ports:
+      - "8088:8088"
+    environment:
+      - SUPERSET_SECRET_KEY=ml-platform-superset-secret-key
+      - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://mluser:mlpass@postgres:5432/superset
+    command: >
+      superset run -h 0.0.0.0 -p 8088
+
 volumes:
   namenode:
   datanode:
