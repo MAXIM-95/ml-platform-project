@@ -134,37 +134,41 @@ services:
 
 #это сервис SuperSet
   superset-init:
-    image: apache/superset:4.1.2
+    build: ./superset
     depends_on:
       - postgres
+
+    volumes:
+      - ./superset:/app/pythonpath
+
     environment:
-      - SUPERSET_SECRET_KEY=ml-platform-superset-secret-key
-      - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://mluser:mlpass@postgres:5432/superset
+      PYTHONPATH: /app/pythonpath
+
     command: >
-      bash -c "
-      superset db upgrade &&
-      superset fab create-admin
-        --username admin
-        --firstname Admin
-        --lastname User
-        --email admin@example.com
-        --password admin || true &&
-      superset init
-      "
+      bash -c "superset db upgrade &&
+      superset fab create-admin --username admin --firstname Admin --lastname User --email admin@example.com --password admin || true &&
+      superset init"
 
   superset:
-    image: apache/superset:4.1.2
+    build: ./superset
     container_name: superset
+
     depends_on:
-      - postgres
       - superset-init
+
     ports:
       - "8088:8088"
+
+    volumes:
+      - ./superset:/app/pythonpath
+
     environment:
-      - SUPERSET_SECRET_KEY=ml-platform-superset-secret-key
-      - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://mluser:mlpass@postgres:5432/superset
+      PYTHONPATH: /app/pythonpath
+
     command: >
       superset run -h 0.0.0.0 -p 8088
+
+    restart: unless-stopped
 
 volumes:
   namenode:

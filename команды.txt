@@ -1,5 +1,6 @@
 поднимаем сервисы в докере (запускаем всегда после перезагрузки компа): docker compose up -d
 проверяем состояние всех сервисов (если у всех UP, то можно работать): docker compose ps
+остановка докера: docker compose down
 
 ШАГ 2: spark читает raw из hdfs (файл json с сырыми данными пока создан вручную для проверки)
 
@@ -14,6 +15,7 @@ df.show(false)
 
 В юпитер заходить так, из консоли виндовс юпитер не тот, нужен из докера
  http://127.0.0.1:8888/lab?token=76ee6a481844d96d5cd8a654bf09359ae8263d214fc47f03
+А найти эту ссылку можно через команду: docker compose logs --tail=200 jupyter (находим ссылку с token=)
 
 
 Поднимаем в докере datanode hdfs: docker compose up -d datanode
@@ -22,3 +24,62 @@ df.show(false)
 
 
 Токен юпитера: 03e79724d1dea472d0639704783a42da8bedbf4c8022b8fb
+
+
+Для ГИТА:
+git status - проверка
+git add . - добавить все
+git push - пушим в гитхаб
+
+коммит в конкретном файле:
+git add docker-compose.yml
+git commit -m "Chore: remove obsolete compose version key"
+git push
+
+
+Предполагаемая архитектура проекта
+
+HH scraper - парсинг странички вакансии
+    ↓
+raw JSON → HDFS (/raw) - формирование сырых данных в hadoop
+    ↓
+Spark SQL → features (/features) - обработка данных в spark
+    ↓
+training dataset 
+    ↓
+model training (Prophet + CatBoost)
+    ↓
+MLflow tracking - анализ модели
+    ↓
+Airflow DAG
+    ↓
+dashboard (Superset) - графики
+
+
+
+
+Права на запись в нужную директорию
+docker exec -it ml_platform-namenode-1 /opt/hadoop-3.2.1/bin/hdfs dfs -mkdir -p /features
+docker exec -it ml_platform-namenode-1 /opt/hadoop-3.2.1/bin/hdfs dfs -chmod -R 777 /features
+docker exec -it ml_platform-namenode-1 /opt/hadoop-3.2.1/bin/hdfs dfs -ls -d /features
+
+Что делать в первый запуск после перерыва:
+1) Запустить докер десктоп
+2) Поднять сервисы в докере: docker compose up -d
+3) Проверить, что все состояние всех сервисов UP: docker compose ps
+4) Проверка работоспособности datanode: docker exec -it ml_platform-namenode-1 /opt/hadoop-3.2.1/bin/hdfs dfsadmin -report
+Если видим Live datanodes (1) с HDFS все впорядке
+5) Проверка, что в хадуп есть созданная нами витрина:
+docker exec -it ml_platform-namenode-1 /opt/hadoop-3.2.1/bin/hdfs dfs -ls /features - должны увидеть папку или файл с витриной
+6) Вход в юпитер (описано выше)
+7) Также можно открыть остальные сервисы:
+HDFS: http://localhost:9870
+SPARK: http://localhost:8080
+MLFLOW: http://localhost:5000
+
+
+Проверка реального UFI HDFS: docker exec -it ml_platform-namenode-1 /opt/hadoop-3.2.1/bin/hdfs getconf -confKey fs.defaultFS
+
+Создание отдельной БД airflow в Postgres: docker exec -it ml_platform-postgres-1 psql -U mluser -d postgres -c "CREATE DATABASE airflow;"
+
+
