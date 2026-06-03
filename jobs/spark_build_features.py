@@ -18,9 +18,21 @@ def main(): #оборачиваю в main чтобы файл можно был�
 
     df = spark.read.option("multiLine", True).json(raw_path) #читаем json файл (multiline нужен, если json не однострочный)
 
-    exploded = (
-        df.withColumn("published_date", F.to_date("published_at")) #нормализую дату
-          .withColumn("skill", F.explode("skills")) #распаковываю список вакансий
+    #exploded = (
+    #    df.withColumn("published_date", F.to_date("published_at")) #нормализую дату
+    #      .withColumn("skill", F.explode("skills")) #распаковываю список вакансий
+    #)
+    #добавил расчет зарплаты, так как в первом exploded этого не было и spark показывал ошибку
+    exploded = ( 
+    df.withColumn("published_date", F.to_date("published_at"))
+      .withColumn("skill", F.explode("skills"))
+      .withColumn(
+          "salary",
+          (
+              F.coalesce(F.col("salary_from"), F.col("salary_to")) +
+              F.coalesce(F.col("salary_to"), F.col("salary_from"))
+          ) / 2
+      )
     )
 
     exploded.createOrReplaceTempView("vacancies_exploded") #создаю временную sql-таблицу, чтобы можно было писать SELECT
